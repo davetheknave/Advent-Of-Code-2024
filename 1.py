@@ -1011,6 +1011,7 @@ inpz = """82728   61150
 """
 
 def solve(inv: str):
+    # turn the input into two sorted lists of integers
     lines = inv.splitlines()
     list1 = []
     list2 = []
@@ -1020,10 +1021,24 @@ def solve(inv: str):
         list2.append(matches[1])
     list1.sort()
     list2.sort()
+    list1 = [int(n) for n in list1]
+    list2 = [int(n) for n in list2]
+
     distance = 0
     for i in range(len(list1)):
-        distance += abs(int(list1[i]) - int(list2[i]))
-    return distance
+        distance += abs(list1[i] - list2[i])
+    
+    similarity = 0
+    frequency = {}
+    for n in list2:
+        if n in frequency:
+            frequency[n] += 1
+        else:
+            frequency[n] = 1
+    for n in list1:
+        similarity += n * frequency.get(n,0)
+
+    return (distance,similarity)
 
 sol = solve(inpz)
 print(sol)
