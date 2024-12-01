@@ -1,6 +1,6 @@
 import re
 
-def regex(pattern: str, subject: str):
+def regex(pattern: str, subject: str) -> tuple[str]:
     matches = re.match(pattern, subject)
     return matches.groups() if matches is not None else None
 
