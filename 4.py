@@ -1,20 +1,5 @@
 import utils
 
-inExample = """MMMSXXMASM
-MSAMXMSMSA
-AMXSXMAAMM
-MSAMASMSMX
-XMASAMXAMM
-XXAMMXXAMA
-SMSMSASXSS
-SAXAMASAAA
-MAMMMXMMMM
-MXMXAXMASX
-"""
-
-with open('4.txt', 'r') as f:
-    inPuzzle = f.read()
-
 def findAllXmas(x: int, y: int, grid: list[str]) -> int:
     """Count how many times xmas appears starting from pos x,y in grid in 8 directions"""
     count = 0
@@ -71,6 +56,21 @@ def solve(inv: str):
 
     # 18, 9 in example
     return (xmases1, xmases2)
+
+inExample = """MMMSXXMASM
+MSAMXMSMSA
+AMXSXMAAMM
+MSAMASMSMX
+XMASAMXAMM
+XXAMMXXAMA
+SMSMSASXSS
+SAXAMASAAA
+MAMMMXMMMM
+MXMXAXMASX
+"""
+
+with open('4.txt', 'r') as f:
+    inPuzzle = f.read()
 
 sol = solve(inPuzzle)
 print(sol)
