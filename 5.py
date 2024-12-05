@@ -1,5 +1,26 @@
 import utils
 
+def fix(update: list[int], rules: dict) -> list[int]:
+    # this is similar to the code I used to check updates, but if an error is found, it removes all rule breaking pages, adds the next page, and then adds the rule breaking pages after. It iterates multiple times until it's correct, in case something is readded that breaks a different rule
+    # this could run infinitely if there are any contradictory rules, such as 1|2 and 2|1 both being present.
+    correct = False
+    while not correct:
+        newUpdate = []
+        correct = True
+        for page in update:
+            if page in rules and not rules[page].isdisjoint(newUpdate):
+                # found a page that comes after something it should come before
+                correct = False
+                ruleBreakers = rules[page].intersection(newUpdate)
+                for i in ruleBreakers:
+                    newUpdate.remove(i)
+                newUpdate.append(page)
+                newUpdate.extend(ruleBreakers)
+            else:
+                newUpdate.append(page)
+        update = newUpdate  # we're going to check it again until it's correct
+    return newUpdate
+
 def solve(inv: str):
     # parse input
     input1 = []
@@ -24,23 +45,30 @@ def solve(inv: str):
         rules[r[0]].add(r[1])
     
     # go through each update keeping track of what's been seen, and for each page, check if any rules say that a page that should come after has already been seen
-    middles = []
+    # it it's found to be incorrect, fix it
+    middles1 = []
+    middles2 = []
     for update in input2:
         seen = set()
         correct = True
         for page in update:
             if page in rules and not seen.isdisjoint(rules[page]):
                 correct = False
+                fixedUpdate = fix(update, rules)
+                middles2.append(fixedUpdate[int(len(update)/2)])
                 break
             seen.add(page)
         if correct:
-            middles.append(update[int(len(update)/2)])
+            middles1.append(update[int(len(update)/2)])
 
-    sumOfMiddles = 0
-    for m in middles:
-        sumOfMiddles += m
+    sumOfMiddles1 = 0
+    for m in middles1:
+        sumOfMiddles1 += m
+    sumOfMiddles2 = 0
+    for m in middles2:
+        sumOfMiddles2 += m
 
-    return (sumOfMiddles, None)
+    return (sumOfMiddles1, sumOfMiddles2)
 
 inExample = """47|53
 97|13
