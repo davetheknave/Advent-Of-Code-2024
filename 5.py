@@ -1,4 +1,7 @@
 import utils
+import time
+import argparse
+import os
 
 def fix(update: list[int], rules: dict) -> list[int]:
     # this is similar to the code I used to check updates, but if an error is found, it removes all rule breaking pages, adds the next page, and then adds the rule breaking pages after. It iterates multiple times until it's correct, in case something is readded that breaks a different rule
@@ -100,8 +103,17 @@ inExample = """47|53
 97,13,75,29,47
 """
 
-with open('5.txt', 'r') as f:
-    inPuzzle = f.read()
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input", default="input/"+ os.path.basename(__file__)[0] +".txt", help="The file to run. If not specified, will look for a default file with the same name as this in input/")
+parser.add_argument("-e","--example", action="store_true", help="Run the example instead of reading a file")
+args = parser.parse_args()
 
+if not args.example:
+    with open(args.input, 'r') as f:
+        inPuzzle = f.read()
+else:
+    inPuzzle = inExample
+start = time.time()
 sol = solve(inPuzzle)
-print(sol)
+end = time.time()
+print(f"Finished in {end-start:.3f} seconds: ", sol)

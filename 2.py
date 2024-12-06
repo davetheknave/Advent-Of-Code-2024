@@ -1,15 +1,7 @@
 import utils
-
-inExample = """7 6 4 2 1
-1 2 7 8 9
-9 7 6 2 1
-1 3 2 4 5
-8 6 4 4 1
-1 3 6 7 9
-"""
-
-with open('2.txt', 'r') as f:
-    inPuzzle = f.read()
+import time
+import argparse
+import os
 
 def check_levels(report):
     increasing = False
@@ -53,5 +45,26 @@ def solve(inv):
     
     return (safeCount, safeCount2)
 
+
+inExample = """7 6 4 2 1
+1 2 7 8 9
+9 7 6 2 1
+1 3 2 4 5
+8 6 4 4 1
+1 3 6 7 9
+"""
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input", default="input/"+ os.path.basename(__file__)[0] +".txt", help="The file to run. If not specified, will look for a default file with the same name as this in input/")
+parser.add_argument("-e","--example", action="store_true", help="Run the example instead of reading a file")
+args = parser.parse_args()
+
+if not args.example:
+    with open(args.input, 'r') as f:
+        inPuzzle = f.read()
+else:
+    inPuzzle = inExample
+start = time.time()
 sol = solve(inPuzzle)
-print(sol)
+end = time.time()
+print(f"Finished in {end-start:.3f} seconds: ", sol)

@@ -1,14 +1,14 @@
 import utils
 from functools import reduce
 from operator import add
+import time
+import argparse
+import os
 
 inExample = """xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
 """
 inExample2 = """xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
 """
-
-with open('3.txt', 'r') as f:
-    inPuzzle = f.read()
 
 def solve(inv):
     # Get mul operations, and capture each number, or don't and do operations
@@ -33,5 +33,17 @@ def solve(inv):
     sumOfProducts2 = reduce(add, products2)
     return (sumOfProducts1, sumOfProducts2)
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", "--input", default="input/"+ os.path.basename(__file__)[0] +".txt", help="The file to run. If not specified, will look for a default file with the same name as this in input/")
+parser.add_argument("-e","--example", action="store_true", help="Run the example instead of reading a file")
+args = parser.parse_args()
+
+if not args.example:
+    with open(args.input, 'r') as f:
+        inPuzzle = f.read()
+else:
+    inPuzzle = inExample
+start = time.time()
 sol = solve(inPuzzle)
-print(sol)
+end = time.time()
+print(f"Finished in {end-start:.3f} seconds: ", sol)
