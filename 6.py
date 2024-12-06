@@ -1,4 +1,5 @@
 import utils
+import time
 
 directions = {
     "^":(0,-1),
@@ -13,7 +14,7 @@ def rotate(char: str) -> str:
         case ">": return "v"
         case "v": return "<"
         case "<": return "^"
-        case _: return print("Error")
+        case _: raise Exception("Direction must be one of: ^,>,<,v")
     
 class area:
     def __init__(self, inv: str):
@@ -30,25 +31,24 @@ class area:
         return self.model[y][x]
     
     def find_guard(self) -> ((int,int),str):
-        found = False
         for y,line in enumerate(self.model):
             for x,c in enumerate(line):
                 if c in directions.keys():
                     return ((x,y),c)
-
-def get_front(a: area, position: (int,int), direction: chr) -> (int,int):
-    newPosition = (position[0]+directions[direction][0], position[1]+directions[direction][1])
-    if a.in_bounds(newPosition[0], newPosition[1]):
-        return newPosition
-    else:
-        return None
+    
+    def get_in_front(self, position: (int,int), direction: chr) -> (int,int):
+        newPosition = (position[0]+directions[direction][0], position[1]+directions[direction][1])
+        if self.in_bounds(newPosition[0], newPosition[1]):
+            return newPosition
+        else:
+            return None
                 
-def navigate(a: area, obstruct: (int,int)) -> (int|None,int):
-    """Will return the number of spaces that will be navigated or None if a loop is found"""
+def solve(a: area, obstruct: (int,int) = None) -> (int|None,int):
+    """Returns: None if a loop is found. Otherwise: the number of spaces that will be navigated, and the number of loops created with obstructions. It only creates obstructions if an obstruction has not been passed to it"""
     visited = set()  # (int,int)  used to see where the guard has been
     history = set()  # ((int,int),chr)  used to detect loops
+    loops = set()  # (int,int)
     position,direction = a.find_guard()
-    loops = set()  # sometimes the same loop can be detected twice
     
     while position is not None:
         if (position,direction) in history:
@@ -56,26 +56,18 @@ def navigate(a: area, obstruct: (int,int)) -> (int|None,int):
             return None
         visited.add(position)
         history.add((position,direction))
-        next = get_front(a,position,direction)
+        next = a.get_in_front(position,direction)
         if obstruct is None and next is not None:
-            canLoop = navigate(area(a.model),next) is None
+            canLoop = solve(a,next) is None  # This isn't a recursive algorithm
             if canLoop:
                 loops.add(next)
-        # Facing and obstacle
+        # Facing an obstacle
         if next is not None and (a.get(next[0],next[1]) == "#" or (next[0],next[1]) == obstruct):
             direction = rotate(direction)
         else:
             position = next
     return len(visited),len(loops)
                 
-def solve(inv: str):
-    a = area(inv)
-    sol = navigate(a,None)
-
-    # loops at 7,9,
-    # 41/4939, 6/?
-    return (sol[0], sol[1])
-
 inExample = """\
 ....#.....
 .........#
@@ -92,5 +84,7 @@ inExample = """\
 with open('6.txt', 'r') as f:
     inPuzzle = f.read()
 
-sol = solve(inPuzzle)
-print(sol)
+start = time.time()
+sol = solve(area(inPuzzle))
+end = time.time()
+print(f"Finished in {end-start:.3f} seconds: ", sol)
