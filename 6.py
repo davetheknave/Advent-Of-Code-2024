@@ -38,7 +38,7 @@ class area:
                 if c in directions.keys():
                     return ((x,y),c)
     
-    def get_in_front(self, position: (int,int), direction: chr) -> (int,int):
+    def get_in_front(self, position: (int,int), direction: str) -> (int,int):
         newPosition = (position[0]+directions[direction][0], position[1]+directions[direction][1])
         if self.in_bounds(newPosition[0], newPosition[1]):
             return newPosition
@@ -48,7 +48,7 @@ class area:
 def solve(a: area, obstruct: (int,int) = None) -> (int|None,int):
     """Returns: None if a loop is found. Otherwise: the number of spaces that will be navigated, and the number of loops created with obstructions. It only creates obstructions if an obstruction has not been passed to it"""
     visited = set()  # (int,int)  used to see where the guard has been
-    history = set()  # ((int,int),chr)  used to detect loops
+    history = set()  # ((int,int),str)  used to detect loops
     loops = set()  # (int,int)
     position,direction = a.find_guard()
     
