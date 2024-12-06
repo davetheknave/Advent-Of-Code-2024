@@ -1,5 +1,24 @@
 import utils
 
+class area:
+    def __init__(self, inv: str):
+        self.model = inv.splitlines()
+        self.width = len(self.model[0])
+        self.height = len(self.model)
+
+    def in_bounds(self,x,y):
+        return 0<=x<self.width and 0<=y<self.height
+    
+    def get(self, x:int, y:int) -> str:
+        return self.model[y][x]
+    
+    def find_guard(self) -> ((int,int),str):
+        found = False
+        for y,line in enumerate(self.model):
+            for x,c in enumerate(line):
+                if c in directions.keys():
+                    return ((x,y),c)
+
 directions = {
     "^":(0,-1),
     ">":(1,0),
@@ -14,33 +33,18 @@ def rotate(char: str) -> str:
         case "v": return "<"
         case "<": return "^"
         case _: return print("Error")
-
-def in_bounds(x,y,width,height):
-    return 0 <= x < width and 0 <= y < height
-        
     
 def solve(inv: str):
-    area = inv.splitlines()
-    width = len(area[0])
-    height = len(area)
+    a = area(inv)
     visited = set()
-    position = None
-    direction = ""
-    # Find the guard's starting position
-    for y,line in enumerate(area):
-        for x,c in enumerate(line):
-            if c in ['^','>','<','v']:
-                position = (x,y)
-                direction = c
-                break
-        if len(visited) > 0:
-            break
+    position,direction = a.find_guard()
+
     # navigate
-    while in_bounds(position[0],position[1],width,height):
+    while a.in_bounds(position[0],position[1]):
         visited.add(position)
         next = (position[0]+(directions[direction][0]), position[1]+directions[direction][1])
         # facing an obstacle
-        if in_bounds(next[0],next[1],width,height) and area[next[1]][next[0]] == "#":
+        if a.in_bounds(next[0],next[1]) and a.get(next[0],next[1]) == "#":
             direction = rotate(direction)
         else:
             position = next
