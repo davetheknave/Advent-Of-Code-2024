@@ -35,8 +35,8 @@ def solve(inv: str):
     validResults1 = []
     validResults2 = []
     for l in lines:
-        result = findOperation(l[0], l[1], 0, [], [add,mul])
-        result2 = findOperation(l[0], l[1], 0, [], [add,mul,lambda a,b: int(str(a)+str(b))])
+        result = findOperation(l[0], l[1][1:], l[1][0], [], [add,mul])
+        result2 = findOperation(l[0], l[1][1:], l[1][0], [], [add,mul,lambda a,b: int(str(a)+str(b))])
         if result is not None:
             validResults1.append(l[0])
         if result2 is not None:
