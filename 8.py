@@ -18,20 +18,37 @@ def solve(inv: str):
                     antennas[char] = [(x,y)]
     # Calculate all antinode positions
     antinodeLocations = set()
+    antinodeLocations2 = set()
     for antLocs in antennas.values():  # antLoc: a list of one type of antenna
         for i,antenna1 in enumerate(antLocs):
             for antenna2 in antLocs[i+1:]:
                 dx = antenna1[0] - antenna2[0]
                 dy = antenna1[1] - antenna2[1]
-                anti1 = (antenna1[0]+dx, antenna1[1]+dy)
-                anti2 = (antenna2[0]-dx, antenna2[1]-dy)
-                if 0 <= anti1[0] < width and 0<= anti1[1] < height:
-                    antinodeLocations.add(anti1)
-                if 0 <= anti2[0] < width and 0<= anti2[1] < height:
-                    antinodeLocations.add(anti2)
+                set1 = set()
+                set2 = set()
+                x = antenna1[0]
+                y = antenna1[1]
+                i = 0
+                while 0 <= x < width and 0 <= y < height:
+                    if i == 1:
+                        antinodeLocations.add((x,y))
+                    set1.add((x,y))
+                    x += dx
+                    y += dy
+                    i += 1
+                x = antenna2[0]
+                y = antenna2[1]
+                i = 0
+                while 0 <= x < width and 0 <= y < height:
+                    if i == 1:
+                        antinodeLocations.add((x,y))
+                    set2.add((x,y))
+                    x -= dx
+                    y -= dy
+                    i += 1
+                antinodeLocations2 = antinodeLocations2.union(set1).union(set2)
     print(antinodeLocations)
-    antinodeCount = len(antinodeLocations)
-    return (antinodeCount, None)
+    return (len(antinodeLocations), len(antinodeLocations2))
 
 inExample = """\
 ............
