@@ -5,10 +5,10 @@ import os
 
 def solve(inv: str):
     field = inv.splitlines()
-    antennas = {}
     height = len(field)
     width = len(field[0])
-    # Find all antennas and track their location
+    # Find all antennas and record their location
+    antennas = {}
     for y,line in enumerate(field):
         for x,char in enumerate(line):
             if char != '.':
@@ -17,38 +17,35 @@ def solve(inv: str):
                 else:
                     antennas[char] = [(x,y)]
     # Calculate all antinode positions
-    antinodeLocations = set()
-    antinodeLocations2 = set()
+    antinodes1 = set()
+    antinodes2 = set()
     for antLocs in antennas.values():  # antLoc: a list of one type of antenna
         for i,antenna1 in enumerate(antLocs):
             for antenna2 in antLocs[i+1:]:
                 dx = antenna1[0] - antenna2[0]
                 dy = antenna1[1] - antenna2[1]
-                set1 = set()
-                set2 = set()
-                x = antenna1[0]
-                y = antenna1[1]
+
+                x,y = antenna1
                 i = 0
                 while 0 <= x < width and 0 <= y < height:
                     if i == 1:
-                        antinodeLocations.add((x,y))
-                    set1.add((x,y))
+                        antinodes1.add((x,y))
+                    antinodes2.add((x,y))
                     x += dx
                     y += dy
                     i += 1
-                x = antenna2[0]
-                y = antenna2[1]
+
+                x,y = antenna2
                 i = 0
                 while 0 <= x < width and 0 <= y < height:
                     if i == 1:
-                        antinodeLocations.add((x,y))
-                    set2.add((x,y))
+                        antinodes1.add((x,y))
+                    antinodes2.add((x,y))
                     x -= dx
                     y -= dy
                     i += 1
-                antinodeLocations2 = antinodeLocations2.union(set1).union(set2)
-    print(antinodeLocations)
-    return (len(antinodeLocations), len(antinodeLocations2))
+
+    return (len(antinodes1), len(antinodes2))
 
 inExample = """\
 ............
