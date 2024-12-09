@@ -21,6 +21,10 @@ class Drive(metaclass=MetaDrive):
         self.stuff = []
     def append(self,block: Block):
         self.stuff.append(block)
+    def insert(self,index:int,block:Block):
+        self.stuff.insert(index,block)
+    def pop(self,index:int):
+        self.stuff.pop(index)
     def __getitem__(self,item):
         return self.stuff[item]
     def __len__(self):
@@ -32,6 +36,15 @@ class Drive(metaclass=MetaDrive):
         return size
     def __str__(self) -> str:
         return ''.join([str(x) for x in self.stuff])
+    def get_checksum(self):
+        checksum = 0
+        position = 0
+        for b in self.stuff:
+            if not b.free:
+                for i in range(position,position+b.length):
+                    checksum += i*b.id
+            position = position+b.length
+        return checksum
 
 def solve(inv: str):
     drive = Drive()
@@ -76,18 +89,47 @@ def solve(inv: str):
     # fill remainder of free space
     drive2.append(Block(drive.size()-drive2.size(),-1,True))
 
+    # rearrange for part 2
+    drive3 = Drive()
+    for i in drive:
+        drive3.append(i)
+
+    index = 0
+    reverseIndex = len(drive3)-1
+    attempted = set()
+    while reverseIndex > 0:
+        file = drive3[reverseIndex]
+        if file.id in attempted:
+            reverseIndex -= 1
+            continue
+        if file.id == 2:
+            print(2)
+        if not file.free:
+            attempted.add(file.id)
+            for i,b in enumerate(drive3):
+                if i >= reverseIndex:
+                    break
+                if not b.free:
+                    continue
+                if b.length >= file.length:
+                    drive3.pop(i)
+                    toFill = file.length
+                    drive3.insert(i,Block(toFill,file.id,False))
+                    drive3.pop(reverseIndex)
+                    drive3.insert(reverseIndex,Block(file.length,-1,True))
+                    if toFill < b.length:
+                        drive3.insert(i+1,Block(b.length - toFill,-1,True))
+                        reverseIndex += 1
+                    break
+        reverseIndex -= 1
+
+    # if args.example:
+    #     print(str(drive2))
+
     if args.example:
-        print(str(drive2))
-
-    checksum = 0
-    position = 0
-    for b in drive2:
-        if not b.free:
-            for i in range(position,position+b.length):
-                checksum += i*b.id
-        position = position+b.length
-
-    return (checksum, None)
+        print(str(drive3))
+    
+    return (drive2.get_checksum(), drive3.get_checksum())
 inExample = """2333133121414131402"""
 
 parser = argparse.ArgumentParser()
