@@ -21,6 +21,8 @@ class Drive(metaclass=MetaDrive):
         self.stuff = []
     def append(self,block: Block):
         self.stuff.append(block)
+    def replace(self,index:int,block:Block):
+        self.stuff[index] = block
     def insert(self,index:int,block:Block):
         self.stuff.insert(index,block)
     def pop(self,index:int):
@@ -47,89 +49,75 @@ class Drive(metaclass=MetaDrive):
         return checksum
 
 def solve(inv: str):
-    drive = Drive()
+    drive0 = Drive()
     free = False
-    for i,c in enumerate(inv):
-        drive.append(Block(int(c),i//2 if not free else -1,free))
+    for lIndex,c in enumerate(inv):
+        drive0.append(Block(int(c),lIndex//2 if not free else -1,free))
         free = not free
-    if args.example:
-        print(str(drive))
 
-    # rearrange
-    drive2 = Drive()
-    index = 0
-    reverseIndex = len(drive)-1
-    remaining2 = drive[reverseIndex].length
-    remaining = 0
-    while index <= reverseIndex:
-        # if the next block is not free, just put it there as is
-        if index == reverseIndex and remaining2 > 0:
-            toFill = remaining2
-            drive2.append(Block(toFill,drive[index].id,drive[index].free))
+    # rearrange for part 1
+    drive1 = Drive()
+    lIndex = 0
+    rIndex = len(drive0)-1
+    nextFillSize = drive0[rIndex].length
+    while lIndex <= rIndex:
+        # Sometimes needed at the end if the last thing to move can only be partly moved
+        if lIndex == rIndex:
+            drive1.append(Block(nextFillSize,drive0[lIndex].id,drive0[lIndex].free))
             break
-        if not drive[index].free:
-            drive2.append(Block(drive[index].length,drive[index].id,False))
-            index += 1
+
+        # if the next block is a file, just put it there as is
+        if not drive0[lIndex].free:
+            drive1.append(Block(drive0[lIndex].length,drive0[lIndex].id,False))
+            lIndex += 1
         # if it is free, fill it with stuff from the end
         else:
-            remaining = drive[index].length
-            while remaining > 0 and index <= reverseIndex:
-                if drive[reverseIndex].free:
-                    reverseIndex -= 1
-                    remaining2 = drive[reverseIndex].length
+            dataToMove = drive0[rIndex]
+            remaining = drive0[lIndex].length
+            while remaining > 0 and lIndex <= rIndex:
+                if dataToMove.free:
+                    rIndex -= 1
+                    nextFillSize = dataToMove.length
                     continue
-                toFill = min(remaining2,remaining)
-                drive2.append(Block(toFill,drive[reverseIndex].id,False))
+                toFill = min(nextFillSize,remaining)
+                drive1.append(Block(toFill,dataToMove.id,False))
                 remaining -= toFill
-                remaining2 -= toFill
-                if remaining2 <= 0:
-                    reverseIndex -= 1
-                    remaining2 = drive[reverseIndex].length
-            index += 1
+                nextFillSize -= toFill
+                if nextFillSize <= 0:
+                    rIndex -= 1
+                    nextFillSize = dataToMove.length
+            lIndex += 1
     # fill remainder of free space
-    drive2.append(Block(drive.size()-drive2.size(),-1,True))
+    drive1.append(Block(drive0.size()-drive1.size(),-1,True))
 
     # rearrange for part 2
-    drive3 = Drive()
-    for i in drive:
-        drive3.append(i)
-
-    index = 0
-    reverseIndex = len(drive3)-1
-    attempted = set()
-    while reverseIndex > 0:
-        file = drive3[reverseIndex]
-        if file.id in attempted:
-            reverseIndex -= 1
-            continue
-        if file.id == 2:
-            print(2)
+    drive2 = Drive()
+    drive2.stuff = drive0[:]
+    rIndex = len(drive2)-1
+    while rIndex > 0:
+        file = drive2[rIndex]
         if not file.free:
-            attempted.add(file.id)
-            for i,b in enumerate(drive3):
-                if i >= reverseIndex:
+            for lIndex in range(len(drive2)):
+                space = drive2.stuff[lIndex]
+                if lIndex >= rIndex:
                     break
-                if not b.free:
+                if not space.free:
                     continue
-                if b.length >= file.length:
-                    drive3.pop(i)
+                if space.length >= file.length:
+                    # replace destination with file
                     toFill = file.length
-                    drive3.insert(i,Block(toFill,file.id,False))
-                    drive3.pop(reverseIndex)
-                    drive3.insert(reverseIndex,Block(file.length,-1,True))
-                    if toFill < b.length:
-                        drive3.insert(i+1,Block(b.length - toFill,-1,True))
-                        reverseIndex += 1
+                    drive2.replace(lIndex,Block(toFill,file.id,False))
+                    if toFill < space.length:
+                        drive2.insert(lIndex+1,Block(space.length - toFill,-1,True))
+                        rIndex += 1
+                    # replace source with free space
+                    drive2.replace(rIndex,Block(file.length,-1,True))
                     break
-        reverseIndex -= 1
+        rIndex -= 1
 
-    # if args.example:
-    #     print(str(drive2))
+    return (drive1.get_checksum(), drive2.get_checksum())
 
-    if args.example:
-        print(str(drive3))
-    
-    return (drive2.get_checksum(), drive3.get_checksum())
+inExample = """12345"""
 inExample = """2333133121414131402"""
 
 parser = argparse.ArgumentParser()
