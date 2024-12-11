@@ -11,8 +11,6 @@ inExample = """3   4
 3   3
 """
 
-with open('input/1.txt', 'r') as f:
-    inPuzzle = f.read()
 
 def solve(inv: str):
     # turn the input into two sorted lists of integers
