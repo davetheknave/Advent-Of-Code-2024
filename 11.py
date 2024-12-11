@@ -2,91 +2,50 @@ import utils
 import time
 import argparse
 import os
+import math
+from collections import defaultdict
 
-class Link:
-    def __init__(self,marking):
-        self.value = int(marking)
-        self.next = None
-    def change(self):
-        # print(self.value,' ',end='')
-        if self.value == 0:
-            # print("0->1")
-            self.value = 1
-            return self.next
-        strVal = str(self.value)
-        if len(strVal) % 2 == 0:
-            # print("split")
-            self.value = int(strVal[0:len(strVal)//2])
-            newLink = Link(int(strVal[len(strVal)//2:]))
-            newLink.next = self.next
-            self.next = newLink
-            return self.next.next
-        # print("2024")
-        self.value *= 2024
-        return self.next
+def digits(value):
+    return math.floor(math.log10(value)+1)
+def split(value,splitPoint):
+    first = value//(10**splitPoint)
+    second = value - (first*(10**splitPoint))
+    return [first,second]
+def blink(value):
+    if value == 0:
+        return [1]
+    d = digits(value)
+    if d % 2 == 0:
+        return split(value,d//2)
+    return [value * 2024]
 
-class LinkedList:
-    def __init__(self,start=None):
-        self.start = start
-        self.end = None
-        if start is None:
-            pass
-        elif isinstance(start, list):
-            self.start = None
-            self.end = None
-            for i in start:
-                self.append(i)
-        elif isinstance(start, Link):
-            current = self.start
-            while current.next is not None:
-                current = current.next
-            self.end = current
-        else:
-            self.start = Link(start)
-            self.end = self.start
+def blink_many(stones,count):
+    for i in range(count):
+        for k,v in list(stones.items()):
+            stones[k] -= v
+            for i in blink(k):
+                stones[i] += v
+        for k in list(stones.keys()):
+            if stones[k] == 0:
+                del stones[k]
+    return stones
 
-    def foreach(self,func):
-        current = self.start
-        while current is not None:
-            func(current)
-            current = current.next
-    def append(self,value):
-        newLink = Link(value)
-        if self.end is None:
-            self.start = newLink
-            self.end = self.start
-            return
-        else:
-            self.end.next = newLink
-            self.end = newLink
-    def blink(self):
-        current = self.start
-        while current is not None:
-            current = current.change()
-    def count(self):
-        count = 0
-        current = self.start
-        while current is not None:
-            count += 1
-            current = current.next
-        return count
-    def print(self):
-        def printLink(a):
-            print(a.value,end='')
-            print(', ',end='')
-        self.foreach(printLink)
-        print()
-        
+def count_stones(stones):
+    count = 0
+    for s in stones.values():
+        count += s
+    return count
 
 def solve(inv: str):
-    blinks = 25  # 25 in input, 1 in example
-    stones = inv.split()
-    newStones = LinkedList(stones)
-    # newStones.print()
-    for _ in range(blinks):
-        newStones.blink()
-    # newStones.print()
-    return (newStones.count(), None)
+    inv = [int(x) for x in inv.split()]
+    stones = defaultdict(int)
+    for s in inv:
+        stones[s] += 1
+    
+    blinks1 = blink_many(stones.copy(),25)
+    blinks2 = blink_many(stones.copy(),75)
+    
+    return (count_stones(blinks1),count_stones(blinks2))
 
 # inExample = """
 # 0 1 10 99 999
